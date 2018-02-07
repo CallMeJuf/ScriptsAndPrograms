@@ -7,7 +7,7 @@
 #define lli long long int
 #define False 0
 #define True 1
-#define logLocation "/home/juf/Programs/netlog"
+#define logLocation "/var/log/netlog"
 /*
 * Takes log file at logLocation formatted as
 * timestamp,uptime,upbytes,downbytes

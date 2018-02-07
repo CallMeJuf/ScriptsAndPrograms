@@ -6,4 +6,4 @@ read rx < "/sys/class/net/${INTERFACE}/statistics/rx_bytes"
 read tx < "/sys/class/net/${INTERFACE}/statistics/tx_bytes"
 date=$(date +%s)
 uptime=$(awk '{print $1}' /proc/uptime)
-echo "${date},${uptime},${tx},${rx}" >> /home/juf/Programs/netlog
+echo "${date},${uptime},${tx},${rx}" >> /var/log/netlog

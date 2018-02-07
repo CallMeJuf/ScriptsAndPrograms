@@ -5,7 +5,7 @@ Before=shutdown.target reboot.target halt.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/juf/Programs/logNetUsage
+ExecStart=/usr/local/bin/logNetUsage
 
 [Install]
 WantedBy=halt.target reboot.target shutdown.target
