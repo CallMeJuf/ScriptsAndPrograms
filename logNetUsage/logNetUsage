@@ -1,0 +1,9 @@
+#!/bin/bash
+INTERFACE=$(ip route | awk '/^default/ { print $5 ; exit }')
+
+# grabbing data for each adapter.
+read rx < "/sys/class/net/${INTERFACE}/statistics/rx_bytes"
+read tx < "/sys/class/net/${INTERFACE}/statistics/tx_bytes"
+date=$(date +%s)
+uptime=$(awk '{print $1}' /proc/uptime)
+echo "${date},${uptime},${tx},${rx}" >> /home/juf/Programs/netlog

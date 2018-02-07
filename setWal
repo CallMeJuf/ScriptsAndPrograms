@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# My wallpapers directory contains folders of wallpapers that are themed
+# (ex, games, nature, buildings etc). As well as a subfolder in each for
+# vertical wallpapers (for my portrait monitor). This script selects a
+# random theme and three random wallpapers from that theme (2 landscape
+# 1 portrait) and applies them to my background. If the selected directory
+# doesn't have any vertical wallpapers yet it is skipped.
+
+WalDir="$HOME/Pictures/Wallpapers/"
+checkDir=($(ls -p "${WalDir}" | grep / | shuf))
+
+for d in ${checkDir[*]} ; do
+    
+    curDir="${WalDir}${d}"
+    if [[ -d "${curDir}Vertical/" ]]; then
+        hWalls=($(ls -p ${curDir} | grep -v / | shuf -n 2))
+        vWall=$(ls -p ${curDir}Vertical/ | grep -v / | shuf -n 1)
+
+        if [[ ${#hWalls[@]} -eq 2 && -n "${vWall}" ]]; then
+            foundWallpapers="YES"
+            break
+        fi
+
+    fi
+done
+
+if [[ -z "$foundWallpapers" ]]; then
+  echo "Exhausted all wallpaper directories without finding suitable walls."
+  exit 1  
+fi
+
+feh --bg-fill --no-fehbg "${curDir}${hWalls[0]}" "${curDir}${hWalls[1]}" "${curDir}/Vertical/${vWall}"
+exit 0

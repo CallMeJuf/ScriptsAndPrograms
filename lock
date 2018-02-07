@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# This script uses systemctl, i3lock and ffmpeg to lock and suspend my
+# session with a blurred image of whatever was currently being displayed.
+# Also has an option to block the use of this script with a lockfile for
+# when you accidentally hit the hotkey or have something important running
+# in the background.
+
+print_help ()
+{
+    echo "Please choose one flag"
+    echo "-s|--suspend  : Locks and suspends computer"
+    echo "-t|--toggle   : Toggles lockfile (to prohibit locking/suspending)"
+    echo "-l|--lock     : Lock no suspend"
+}
+
+lock ()
+{
+    scrot "$HOME/Programs/lock/wall.png"
+    ffmpeg -loglevel quiet -y -i "$HOME/Programs/lock/wall.png" -vf "gblur=sigma=10" "$HOME/Programs/lock/wallb.png"
+    rm "$HOME/Programs/lock/wall.png"
+    i3lock -i "$HOME/Programs/lock/wallb.png" -f
+}
+if [ $# -ne 1 ]; then
+    print_help
+    exit 1
+fi
+
+lockfile="$HOME/Programs/lock/.lockfile"
+
+case "$1" in
+    -s|--suspend)
+        if [ -f $lockfile ]; then
+            notify-send "Blocked" "Suspend blocked due to lockfile."
+        else
+            lock
+            systemctl suspend
+        fi
+        ;;
+    -l|--lock)
+        if [ -f $lockfile ]; then
+            notify-send "Blocked" "Suspend blocked due to lockfile."
+        else
+            lock
+        fi
+    ;;
+    -t|--toggle)
+        if [ -f "$lockfile" ] 
+        then
+            rm $lockfile
+            notify-send "Unlocked" "Suspend lockfile removed."
+        else
+            touch $lockfile
+            notify-send "Locked" "Suspend lockfile created."
+        fi
+        ;;
+
+    *)
+        print_help
+        exit 1
+        ;;
+esac
+
