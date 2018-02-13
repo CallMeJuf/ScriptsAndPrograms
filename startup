@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ ! -f "/tmp/.started" ]
+then
+    programs=( discord steam pavucontrol chromium )
+    for program in "${programs[@]}"
+    do
+        $program &> /dev/null &
+    done
+    touch /tmp/.started
+fi
