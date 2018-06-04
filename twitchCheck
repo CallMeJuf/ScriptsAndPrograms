@@ -1,0 +1,65 @@
+#!/bin/bash
+# twitchNameCheck
+# Usage: twitchNameCheck username [ emailRecipient ]
+# Prints to stdout, except when supplied with an email.
+# Stop file is generated upon success.
+# Exit Statuses:
+# 1 - Invalid number of parameters
+# 2 - Missing required programs
+# 3 - Stopped by stopfile
+# *** TODO ***
+# Add options for stopfile parameters in different locations, output ect
+
+twitchURL="https://passport.twitch.tv/usernames/"
+twitchUsername=""
+emailRecipient=""
+scriptName="$(basename "$0")"
+hasRequirements=0
+
+case $# in
+    1) twitchUsername=$1
+    ;;
+    2) twitchUsername=$1
+       emailRecipient=$2
+       which ssmtp > /dev/null 2>&1
+       if [ $? -ne 0 ]; then
+          echo "ssmtp is required but not found." >&2
+          hasRequirements=1
+       fi
+    ;;
+    *) echo "Usage: ${scriptName} username [ emailRecipient ]" >&2
+       exit 1
+    ;;
+esac
+
+stopfile="${HOME}/.twitch.${twitchUsername}"
+
+which curl > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "curl is required but not found." >&2
+    hasRequirements=1
+fi
+
+if [ ${hasRequirements} -ne 0 ]; then
+    exit 2
+fi
+
+if [ -e "$stopfile" ]; then 
+    exit 3
+fi
+
+RESPONSE=$(curl -s -o /dev/null -I -w "%{http_code}" "${twitchURL}${twitchUsername}" 2> /dev/null)
+
+if [ $RESPONSE -eq 204 ]; then
+
+    touch "$stopfile"
+    outputMessage=$(echo -e "The username ${twitchUsername} is now available on twitch!")
+
+    if [ -z "${emailRecipient}" ]; then
+        echo -e "${outputMessage}"
+    else
+        EMAIL=$(echo -e "To: ${emailRecipient}\nFrom: ${emailSENDER}\nSubject: ${twitchUsername} Now Available\n\nCongrats,\n${outputMessage}\nSincerly,\nJuf")
+        echo "${EMAIL}" | ssmtp "${emailRecipient}"
+    fi
+fi
+
